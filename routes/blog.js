@@ -116,7 +116,7 @@ router.post('/posts/:id/delete', async function (req, res) {
 
 router.get('/posts/:id/comments', async function (req, res) {
   const postId = new ObjectId(req.params.id);
-  console.log(postId);
+  // console.log(postId);
 
   // const post = await db.getDb().collection('posts').findOne({ _id: postId });
   const comments = await db
