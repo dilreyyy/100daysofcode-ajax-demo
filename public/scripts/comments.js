@@ -24,15 +24,29 @@ function loadCommentList(comments){
 
 async function showComments(){
     const postId = loadCommentsButtonElement.dataset.postid;
-    const response = await fetch(`/posts/${postId}/comments`);
-    const responseData = await response.json();
     
-    const comments = loadCommentList(responseData);
-    commentSectionElement.innerHTML = '';
-    commentSectionElement.appendChild(comments);
+    try {
+        const response = await fetch(`/posts/${postId}/comments`);
+    
+        if ( !response.ok ) {
+            return;
+        }
+    
+        const responseData = await response.json();
+        
+        if ( responseData && responseData.length > 0 ) {
+            const comments = loadCommentList(responseData);
+            commentSectionElement.innerHTML = '';
+            commentSectionElement.appendChild(comments);
+        } else { 
+            commentSectionElement.firstElementChild.textContent = 'There are no comments for this post, maybe start by adding one?';
+        }
+    } catch ( error ){
+        alert ( 'Error fetchin comments' );
+    }
 }
 
-function submitCommentForm(event){
+async function submitCommentForm(event){
     event.preventDefault();
     const postId = loadCommentsButtonElement.dataset.postid;
     const commentTitle = commentTitleElement.value;
@@ -40,14 +54,28 @@ function submitCommentForm(event){
 
     const comment = {title: commentTitle, text: commentText}
 
-    fetch(`/posts/${postId}/comments`, {
-        method: 'POST',
-        body: JSON.stringify(comment),
-        headers: {
-            'Content-type': 'application/json'
+    try {
+        const response = await fetch(`/posts/${postId}/comments`, {
+            method: 'POST',
+            body: JSON.stringify(comment),
+            headers: {
+                'Content-type': 'application/json'
+            }
+        })
+        console.log(response.ok);
+        
+        if (response.ok) {
+            commentTitleElement.value = '';
+            commentTextElement.value = ''; 
+            showComments();
+            console.log("ok");
+        }else{
+            console.log("not ok");
+            alert ('Could not add comments - maybe try again later!');
         }
-    })
-    // console.log(commentTitle, commentText);
+    } catch ( error ) {
+        alert ('Could not send request');
+    }
 }
 
 loadCommentsButtonElement.addEventListener('click', showComments);
